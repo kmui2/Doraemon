@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<!--
+Created using JS Bin
+http://jsbin.com
+
+Copyright (c) 2016 by kmui2 (http://jsbin.com/viheqo/26/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
+<html>
+<head>
+<meta name="description" content="Doraemon">
+	<meta charset="utf-8">
+	<title>HTML Test</title>
+</head>
+<body>
+	<canvas id="myCanvas" width="1000" height="400" style="border:1px solid #000;"></canvas>
+    <!--
+<input id="slider" type="range" min="-6.28" max="6.28" />
+-->
+<script id="jsbin-javascript">
+function Doraemon (context, headCenterX, headCenterY, width, height, lineWidthRatio) {
+  this.width = width || 0.5;
+  this.height = height || 0.5;
+  // this is its state - it gets over-ridden if there is a path
+  this.headCenterX = headCenterX || 200;
+  this.headCenterY = headCenterY || 200;
+  this.headRadius = width / 4;
+  this.context = context;
+  this.lineWidthRatio = lineWidthRatio;
+  this.speedX = 0;
+  this.speedY = 0;
+  this.armAngle = 0;
+  this.legAngle = 0;
+  this.flyerAngle = 0;
+  this.mouseX = headCenterX;
+  this.mouseY = headCenterY;
+}
+
+Doraemon.prototype.drawHead = function () {
+        
+  //head outline
+  var startAngle = 0.75 * Math.PI;
+  var endAngle = 0.25 * Math.PI;
+  this.context.translate(this.headCenterX, this.headCenterY);
+  this.context.beginPath();
+  this.context.arc(0, 0, 50, startAngle, endAngle, false)
+  this.context.fillStyle = "#00BAFF"
+  this.context.fill(); 
+  this.context.lineWidth = 2;
+  this.context.closePath();
+  this.context.stroke();
+}
+
+Doraemon.prototype.drawFace = function () {
+   //face
+  this.context.save();
+  this.context.beginPath();
+  this.context.translate(this.headCenterX, this.headCenterY);
+  var faceStartX = -25;
+  var faceStartY = 35;
+
+  var controlPoint1X = -87.5;
+  var controlPoint1Y = -50;
+
+  var controlPoint2X =  87.5;
+  var controlPoint2Y = -50
+
+  var endingPointX =  25;
+  var endingPointY =  35;
+
+  this.context.moveTo(faceStartX, faceStartY);
+  this.context.bezierCurveTo(controlPoint1X, controlPoint1Y, controlPoint2X, controlPoint2Y, endingPointX, endingPointY)
+  this.context.fillStyle = "#FFFFFF"
+  this.context.lineWidth = 1;
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+  this.context.restore();
+  
+  this.context.save();
+  this.drawNose();
+  this.context.restore();
+  
+  this.context.save();
+  this.drawEyes();
+  this.context.restore();
+  
+  this.context.save();
+  this.drawMouth();
+  this.context.restore();
+  
+  this.context.save();
+  this.drawWhiskers();
+  this.context.restore();
+  
+}
+
+Doraemon.prototype.drawNose = function () {
+  //nose
+  this.context.beginPath();
+  this.context.translate(this.headCenterX, this.headCenterY);
+  ellipse(this.context, 0, -8.5, 7, 8);
+  this.context.lineWidth = 1;
+  this.context.strokeStyle = "#000000";
+  this.context.fillStyle = "#DA0000"
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+  //nose reflection
+  this.context.beginPath();
+  this.context.arc( -1.5, -11.5, 2, 0, 2 * Math.PI, false);
+  this.context.lineWidth = 0;
+  this.context.strokeStyle = "#FFFFFF";
+  this.context.fillStyle = "#FFFFFF"
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+}
+
+Doraemon.prototype.drawEyes = function () {
+  //right eye
+  this.context.beginPath();
+  this.context.translate(this.headCenterX, this.headCenterY);
+  ellipse(this.context, -12.5, -26.25, 12, 14);
+  this.context.lineWidth = 1.2;
+  this.context.fillStyle = "#FFFFFF";
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+
+  //left eye
+  this.context.beginPath();
+  ellipse(this.context, 12.5, -26.25, 12, 14);
+  this.context.lineWidth = 1.2;
+  this.context.fillStyle = "#FFFFFF";
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+
+  //right pupil
+  this.context.beginPath();
+  ellipse(this.context, -6.4, -25, 2.4, 3.5);
+  this.context.lineWidth = 3;
+  this.context.fillStyle = "#FFFFFF";
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+
+  //left pupil
+  this.context.beginPath();
+  ellipse(this.context, 6.4, -25, 2.4, 3.5);
+  this.context.lineWidth = 3;
+  this.context.fillStyle = "#FFFFFF";
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+}
+
+Doraemon.prototype.drawMouth = function () {
+  //mouth
+  this.context.beginPath();
+  this.context.translate(this.headCenterX, this.headCenterY);
+  this.context.moveTo(0, 0);
+  this.context.lineTo(0, 25);
+  this.context.lineWidth = 1.2;
+  this.context.moveTo(-30, 5);
+  this.context.bezierCurveTo(-12.5, 30, 12.5, 30, 30, 5);
+  this.context.stroke();
+  this.context.closePath();
+}
+
+Doraemon.prototype.drawWhiskers = function () {
+  // whiskers
+  this.context.beginPath();
+  this.context.translate(this.headCenterX, this.headCenterY);
+  // upper whiskers
+  this.context.moveTo(-10, -5);
+  this.context.lineTo (-33.75,  -15);
+  this.context.moveTo(10,  -5);
+  this.context.lineTo (33.75, -15);
+  // middle whiskers
+  this.context.moveTo(-10, 0);
+  this.context.lineTo (-36.75, 0);
+  this.context.moveTo(10, 0);
+  this.context.lineTo (36.25, 0);
+  // lower whiskers
+  this.context.moveTo(-10, 5);
+  this.context.lineTo (-33.75, 15);
+  this.context.moveTo(10, 5);
+  this.context.lineTo (33.75, 15);
+
+  this.context.lineWidth = 1;
+  this.context.fillStyle = "#FFFFFF";
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+}
+
+Doraemon.prototype.drawCollar = function () {
+  // collar
+  this.context.beginPath();
+  this.context.translate(this.headCenterX, this.headCenterY);
+  this.context.moveTo (-35, 37.5);
+  this.context.lineTo(35, 37.5);
+  this.context.lineWidth = 8;
+  this.context.strokeStyle = "#DA0000"
+  this.context.lineCap = "round";
+  this.context.stroke();
+  this.context.closePath();
+}
+
+Doraemon.prototype.drawBody = function () {
+  
+  //body outline
+  this.context.save();
+  this.context.translate(this.headCenterX, this.headCenterY);
+  
+  this.context.save();
+  this.context.beginPath();
+  this.context.strokeStyle = "#000000";
+  this.context.fillStyle = "#00BAFF";
+  this.context.lineWidth = 2;
+  ellipse(this.context, 0, 55, 40, 35);
+  this.context.fill();
+  this.context.stroke();
+  ellipse(this.context, 22.5, 60, 17.5, 40); 
+  this.context.fill();
+  this.context.stroke();
+  ellipse(this.context, -22.5, 60, 17.5, 40); 
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+  this.context.restore();
+  
+  this.context.beginPath();
+  this.context.strokeStyle = "#00BAFF";
+  this.context.fillStyle = "#00BAFF";
+  ellipse(this.context, 0, 55, 38, 33);
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+  this.context.restore();
+  
+  this.context.save();
+  this.drawBelly();
+  this.context.restore();
+  
+  this.context.save();
+  this.drawPouch();
+  this.context.restore();
+  
+}
+
+Doraemon.prototype.drawPouch = function() {
+  this.context.beginPath();
+  this.context.translate(this.headCenterX, this.headCenterY);
+  this.context.arc(0, 57.5, 20, 0, Math.PI, false);
+  this.context.lineTo(20, 57.5);
+  this.context.fillStyle = "white";
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+}
+
+Doraemon.prototype.drawBelly = function() {
+  this.context.beginPath();
+  this.context.translate(this.headCenterX, this.headCenterY);
+  ellipse(this.context, 0, 60, 30, 25);
+  this.context.fillStyle = "white";
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+}
+
+Doraemon.prototype.drawArms = function () {
+  //arms outline
+  this.context.save();
+  this.context.beginPath();
+  var armsCenterX = this.headCenterX;
+  var armsCenterY = this.headCenterY + (this.headRadius * 1);
+  this.context.translate(armsCenterX, armsCenterY);
+  
+  //right arm
+  this.context.save();
+  this.context.fillStyle = "#00BAFF";
+  this.context.lineWidth = 1.5;
+  this.context.beginPath();
+  this.context.translate((-75 * Math.cos(this.armAngle/10))/ 2, (75 * Math.sin(this.armAngle/10))/2);
+  this.context.rotate(-2 * this.armAngle/10);
+  ellipse(this.context, 0, 0, 30, 10);
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+  this.context.beginPath();
+  this.context.arc(-30,0, 10, Math.PI * 2, false);
+  this.context.fillStyle = "#FFFFFF";
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+  this.context.restore();
+  
+  
+  //left arm
+  this.context.save();
+  this.context.strokeStyle = "black";
+  this.context.fillStyle = "#00BAFF";
+  this.context.lineWidth = 1.5;
+  this.context.beginPath();
+  this.context.translate((75 * Math.cos(this.armAngle/10))/ 2, (75 * Math.sin(this.armAngle/10))/2);
+  this.context.rotate(2 * this.armAngle/10);
+  ellipse(this.context, 0, 0, 30, 10);
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+  this.context.beginPath();
+  this.context.arc(30,0, 10, Math.PI * 2, false);
+  this.context.fillStyle = "#FFFFFF";
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+  this.context.restore();
+}
+
+Doraemon.prototype.drawLegs = function () {
+  //legs outline
+  
+  this.context.beginPath();
+  var armsCenterX = this.headCenterX;
+  var armsCenterY = this.headCenterY + (this.headRadius * 1.25);
+  this.context.translate(armsCenterX, armsCenterY + 35);
+  
+  this.context.lineWidth = 1;
+  this.context.lineCap = "round";
+  this.context.strokeStyle = "black";
+  this.context.fillStyle = "white";
+  this.context.lineWidth = 3.5;
+  
+  this.context.save();
+  this.context.translate((-50 * Math.cos(this.armAngle/10))/ 2, (40 * Math.sin(this.armAngle/10))/2);
+  this.context.rotate(2 * -this.armAngle/10);
+  ellipse(this.context, 0, 0, 20, 10);
+  this.context.fill();
+  this.context.restore();
+  
+  this.context.save();
+  this.context.translate((50 * Math.cos(this.armAngle/10))/ 2, (40 * Math.sin(this.armAngle/10))/2);
+  this.context.rotate(2 * this.armAngle/10); 
+  ellipse(this.context, 0, 0, 20, 10); 
+  this.context.restore();
+  this.context.stroke();
+  this.context.fill();
+  this.context.closePath();
+}
+
+Doraemon.prototype.drawBell = function () {
+  // bell
+  this.context.beginPath();
+  this.context.translate(this.headCenterX, this.headCenterY);
+  this.context.arc(0, 45, 7.5, 2 * Math.PI, false);
+  this.context.fillStyle = "#FFC000";
+  this.context.fill();
+  this.context.stroke();
+  this.context.closePath();
+  // hole
+  this.context.beginPath();
+  this.context.arc(0, 47.5, 1.5, 2 * Math.PI, false);
+  this.context.fill();
+  this.context.moveTo (-7, 40.5);
+  this.context.lineTo (7, 40.5);
+  this.context.moveTo (-8, 43.25);
+  this.context.lineTo (8, 43.25);
+  this.context.moveTo (0, 47.5);
+  this.context.lineTo(0, 53);
+  this.context.lineWidth = 1.5;
+  this.context.stroke();
+  this.context.closePath();
+}
+
+Doraemon.prototype.drawFlyer = function () {
+  this.context.beginPath();
+  this.context.translate(this.headCenterX, this.headCenterY);
+  this.context.moveTo(0, -50);
+  this.context.lineTo (0, -60);
+  this.context.stroke();
+  this.context.closePath();
+  
+  this.context.beginPath();
+  this.context.translate(0, -60);
+  this.context.scale(2,1);
+  this.context.rotate(this.flyerAngle);
+  this.context.arc(0, 0, 10, 2 * Math.PI, false);
+  this.context.lineTo(-10, 0);
+  this.context.stroke();
+  this.context.closePath();
+}
+
+function ellipse(context, cx, cy, rx, ry){
+  context.save(); // save state
+  context.beginPath();
+
+  context.translate(cx-rx, cy-ry);
+  context.scale(rx, ry);
+  context.arc(1, 1, 1, 0, 2 * Math.PI, false);
+
+  context.restore(); // restore to original state
+  context.stroke();
+}
+
+Doraemon.prototype.draw = function() {
+  this.context.save();
+  this.drawArms();
+  this.context.restore();
+  
+  this.context.save();
+  this.drawLegs();
+  this.context.restore();
+  
+  this.context.save();
+  this.drawBody();
+  this.context.restore();
+  
+  this.context.save();
+  this.drawHead();
+  this.context.restore();
+  
+  this.context.save();
+  this.drawFace();
+  this.context.restore();
+  
+  this.context.save();
+  this.drawCollar();
+  this.context.restore();
+  
+  this.context.save();
+  this.drawBell();
+  this.context.restore();
+  
+  this.context.save();
+  this.drawFlyer();
+  this.context.restore();
+}
+
+Doraemon.prototype.update = function() {
+  var randomNumY = Math.random() + this.speedY * 0.2;
+  
+  if (randomNumY > 0.5)
+    this.speedY -= 0.05;
+  else 
+    this.speedY += 0.05;
+  
+  var randomNumX = Math.random() + this.speedX * 0.2;
+  if (randomNumX > 0.5)
+    this.speedX -= 0.05;
+  else 
+    this.speedX += 0.05;
+  
+  this.speedY += (this.mouseY - this.headCenterY) * 0.0003;
+  this.speedX += (this.mouseX - this.headCenterX) * 0.0003;
+  
+  if (this.speedY > 0 && this.armAngle > -Math.PI * 2)
+    this.armAngle -= 0.02;
+  else if (this.armAngle < Math.PI *2)
+    this.armAngle += 0.02;
+  
+  if (this.speedY > 0 && this.legAngle > -Math.PI * 2)
+    this.legAngle -= 0.02;
+  else if (this.legAngle < Math.PI *2)
+    this.legAngle += 0.02;
+  
+  
+  
+  this.headCenterY += this.speedY;
+  this.headCenterX += this.speedX;
+  
+  this.flyerAngle += 0.5;
+  
+  if (this.armAngle < 0)
+    this.armAngle += 0.008;
+  else
+    this.armAngle -= 0.008;
+  
+  if (this.legAngle < 0)
+    this.legAngle += 0.008;
+  else
+    this.legAngle -= 0.008;
+  //this.context.rotate(0.001);
+  //console.log("(" + this.mouseX + ", " + this.mouseY + ")");
+}
+
+</script>
+</body>
+<script> "use strict"
+  
+  
+  function myApp() {
+    var canvas;
+    var context;
+    var slider;
+    var doraemon;
+    
+    
+    
+    function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top
+        };
+      }
+    
+	
+    function draw() {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      doraemon.update();
+      doraemon.draw();
+      window.requestAnimationFrame(draw);
+
+    }
+      
+      
+    canvas = document.getElementById('myCanvas');
+    //slider = document.getElementById('slider');
+    context = canvas.getContext('2d');
+
+    //slider.value = 0;
+    var width = 200;
+    var height = 200;
+    var lineWidthRatio = 1;
+    var headCenterX = width / 2;
+    var headCenterY = height / 3;
+    doraemon = new Doraemon(context, headCenterX, 
+                            headCenterY, width, height, lineWidthRatio);
+
+    canvas.addEventListener('mousemove', function(evt) {
+      var mousePos = getMousePos(canvas, evt);
+      doraemon.mouseX = mousePos.x;
+      doraemon.mouseY = mousePos.y;
+      }, false);
+    
+    draw();
+
+  }
+  
+  window.onload = myApp;
+</script>
+  <p>Instructions: Hover your mouse over a point on the canvas. This will make Doraemon&trade; move towards it.</p>
+  <p> &copy Kevin Mui (UW Madison) <img src = "https://images-na.ssl-images-amazon.com/images/I/71hEb5HHBTL.png" width = "30px"/>
+</p>
+ </html>
